@@ -43,6 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Coroutines\CoroutineEngine.cs" />
+    <Compile Include="Coroutines\Conditionals\WaitUntil.cs" />
+    <Compile Include="Coroutines\Conditionals\WaitFrames.cs" />
+    <Compile Include="Coroutines\Coroutine.cs" />
+    <Compile Include="Coroutines\CoroutineRunner.cs" />
+    <Compile Include="Coroutines\ExecutionTime.cs" />
+    <Compile Include="Coroutines\Yielder.cs" />
     <Compile Include="EventWarlock\EWConditional.cs" />
     <Compile Include="EventWarlock\EWConditionGroup.cs" />
     <Compile Include="EventWarlock\Grimoire.cs" />
@@ -59,8 +66,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="EventWarlock\WarlockEffects\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
