@@ -13,9 +13,18 @@ namespace RTCV.CorruptCore.EventWarlock
     /// <summary>
     /// I'm a wizard hagrid
     /// </summary>
-    static class Warlock
+    public static class Warlock
     {
         public static Grimoire BookOfSpells = new Grimoire();
+        public static bool LastResult { get; private set; } = false;
+
+
+        public static void Clear()
+        {
+            BookOfSpells.LoadSpells.Clear();
+            BookOfSpells.PreExecuteSpells.Clear();
+            BookOfSpells.PostExecuteSpells.Clear();
+        }
 
         public static void SaveGrimoire(string path)
         {
@@ -54,7 +63,7 @@ namespace RTCV.CorruptCore.EventWarlock
         {
             for (int j = 0; j < BookOfSpells.LoadSpells.Count; j++)
             {
-                BookOfSpells.LoadSpells[j].Execute();
+                LastResult = BookOfSpells.LoadSpells[j].Execute();
             }
         }
 
@@ -62,7 +71,7 @@ namespace RTCV.CorruptCore.EventWarlock
         {
             for (int j = 0; j < BookOfSpells.PreExecuteSpells.Count; j++)
             {
-                BookOfSpells.PreExecuteSpells[j].Execute();
+                LastResult = BookOfSpells.PreExecuteSpells[j].Execute();
             }
         }
 
@@ -70,7 +79,7 @@ namespace RTCV.CorruptCore.EventWarlock
         {
             for (int j = 0; j < BookOfSpells.PostExecuteSpells.Count; j++)
             {
-                BookOfSpells.PostExecuteSpells[j].Execute();
+                LastResult = BookOfSpells.PostExecuteSpells[j].Execute();
             }
         }
     }

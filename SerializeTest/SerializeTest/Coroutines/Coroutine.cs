@@ -13,13 +13,11 @@ namespace Assets.Scripts.Core.OssCoroutines
         //False of movenext means done;
         public bool IsComplete { get; protected set; } = false;
         public bool Paused { get; protected set; } = false;
-        CoroutineRunner system;
         IEnumerator<Yielder> coroutine;
         Yielder currentConditional;
-        public Coroutine(IEnumerator<Yielder> coroutine, CoroutineRunner sys)
+        public Coroutine(IEnumerator<Yielder> coroutine)
         {
             this.coroutine = coroutine;
-            this.system = sys;
             Paused = false;
             currentConditional = coroutine.Current;
         }
@@ -34,29 +32,15 @@ namespace Assets.Scripts.Core.OssCoroutines
             Paused = false;
         }
 
-        public void StopCoroutine()
-        {
-            IsComplete = true;
-            system.RemoveCoroutine(this);
-        }
-
         public void Stop()
         {
             currentConditional = null;
             IsComplete = true;
         }
 
-        public void Restart()
-        {
-            coroutine.Reset();
-            Paused = false;
-            currentConditional = null;
-            system.AddCoroutineLast(this);
-        }
-
         public void DoCycle()
         {
-            if(Paused)
+            if(IsComplete || Paused)
             {
                 //Do nothing
             }

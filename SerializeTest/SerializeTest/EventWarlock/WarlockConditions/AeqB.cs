@@ -1,4 +1,5 @@
 ﻿using RTCV.CorruptCore.EventWarlock;
+using SerializeTest.WarlockEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,12 @@ using System.Threading.Tasks;
 namespace SerializeTest.EventWarlock.WarlockConditions
 {
     [Serializable]
-    class FirstEqualsSecond : EWConditional
+    public class FirstEqualsSecond : EWConditional
     {
-        string a = "";
-        string b = "";
+        [LinkToCtor("a")] string a = "";
+        [LinkToCtor("b")] string b = "";
+
+        [EditorConstructor]
         public FirstEqualsSecond(string a, string b)
         {
             this.a = a;

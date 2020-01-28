@@ -23,6 +23,7 @@ namespace SerializeTest
             Console.Write("b");
             yield return new WaitFrames(3);
             Console.Write("c");
+
         }
 
 
@@ -37,8 +38,8 @@ namespace SerializeTest
                 Console.Write("\r\n");
             }
 
+            LogicStuff();
             Console.ReadKey();
-
         }
 
 
@@ -51,7 +52,7 @@ namespace SerializeTest
             if (k == 's')
             {
                 Spell a = new Spell();
-                var eqA = new FirstEqualsSecond("a", "a");
+                var eqA = new FirstEqualsSecond("a", "d");
                 a.SetConditional(eqA);
                 a.AddAction(new WarlockActionEcho("Test"));
                 a.AddAction(new WarlockActionEcho("Test 1"));
@@ -60,19 +61,44 @@ namespace SerializeTest
 
                 Spell b = new Spell();
                 var eqB = new FirstEqualsSecond("a", "b");
-                b.SetConditional(eqB);
-                b.AddAction(new WarlockActionEcho("Test 3"));
-                Warlock.AddPreExecuteSpell(b);
+                b.SetConditional(eqB, true);
+                b.AddAction(new WarlockActionEcho("Test Else"));
+                Warlock.AddLoadSpell(b);
+
+                Spell b2 = new Spell();
+                var eqB2 = new FirstEqualsSecond("a", "a");
+                b2.SetConditional(eqB2, true);
+                b2.AddAction(new WarlockActionEcho("Test Else 2"));
+                Warlock.AddLoadSpell(b2);
 
                 Spell c = new Spell();
+                //(("a"=="l" AND "c"=="c") OR ("b"=="b" AND "c"=="c"))
+                //should always create group as base, otherwise if only one conditional just set as that conditional
                 var eqC = new EWConditionGroup();
-                eqC.AddConditional(new FirstEqualsSecond("a", "a"));
-                eqC.AddOperator(QuestionOp.AND);
-                eqC.AddConditional(new FirstEqualsSecond("c", "c"));
+                var eqC1 = new EWConditionGroup();
+                var eqC2 = new EWConditionGroup();
+
+                //Group1
+                eqC1.AddConditional(new FirstEqualsSecond("a", "l"));
+                eqC1.AddOperator(QuestionOp.AND);
+                eqC1.AddConditional(new FirstEqualsSecond("c", "c"));
+
+                eqC.AddConditional(eqC1);
+                eqC.AddOperator(QuestionOp.OR);
+
+                //Group 2
+                eqC2.AddConditional(new FirstEqualsSecond("b", "b"));
+                eqC2.AddOperator(QuestionOp.AND);
+                eqC2.AddConditional(new FirstEqualsSecond("c", "c"));
+
+                eqC.AddConditional(eqC2);
                 c.SetConditional(eqC);
-                c.AddAction(new WarlockActionEcho("Test 4"));
-                c.AddAction(new WarlockActionEcho("Test 5"));
+
+                c.AddAction(new WarlockActionEcho("Big Test"));
+                c.AddAction(new WarlockActionEcho("Big Test 2"));
                 Warlock.AddPostExecuteSpell(c);
+
+                Console.WriteLine("Spell c: " + eqC.ToString());
 
                 Warlock.SaveGrimoire("./grimoire.dat");
             }
@@ -90,8 +116,6 @@ namespace SerializeTest
 
             Console.WriteLine("Warlock PostExecute");
             Warlock.PostExecute();
-
-            Console.ReadKey();
         }
     }
 }

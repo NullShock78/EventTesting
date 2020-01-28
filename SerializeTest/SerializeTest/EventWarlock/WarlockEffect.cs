@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RTCV.CorruptCore.EventWarlock
 {
     [Serializable]
-    abstract class WarlockEffect
+    public abstract class WarlockEffect
     {
         public virtual void Load() { }
         public virtual void PreExecute() { }

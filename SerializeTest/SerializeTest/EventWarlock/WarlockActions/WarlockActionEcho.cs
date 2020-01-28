@@ -1,3 +1,4 @@
+using SerializeTest.WarlockEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +8,11 @@ using System.Threading.Tasks;
 namespace RTCV.CorruptCore.EventWarlock.WarlockActions
 {
     [Serializable]
-    class WarlockActionEcho : WarlockAction
+    public class WarlockActionEcho : WarlockAction
     {
-        string Data { get; set; }
+        [LinkToCtor("data")] string Data;
 
+        [EditorConstructor]
         public WarlockActionEcho(string data)
         {
             Data = data;

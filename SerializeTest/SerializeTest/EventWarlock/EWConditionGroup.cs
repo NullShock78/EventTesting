@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RTCV.CorruptCore.EventWarlock
 {
     [System.Serializable]
-    class EWConditionGroup : EWConditional
+    public class EWConditionGroup : EWConditional
     {
 
         List<EWConditional> Questions = new List<EWConditional>(2);
@@ -47,5 +47,31 @@ namespace RTCV.CorruptCore.EventWarlock
             }
             return res;
         }
+
+        public override string ToString()
+        {
+            string ret = "(";
+
+            for (int j = 0; j < Questions.Count; j++)
+            {
+                ret += Questions[j].ToString();
+            }
+
+            ret += ")";
+
+            switch (NextOp)
+            {
+                case QuestionOp.AND:
+                    ret += " AND ";
+                    break;
+                case QuestionOp.OR:
+                    ret += " OR ";
+                    break;
+                default:
+                    break;
+            }
+            return ret;
+        }
+
     }
 }
