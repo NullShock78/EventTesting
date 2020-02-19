@@ -115,5 +115,24 @@ namespace RTCV.CorruptCore.EventWarlock
                 ExecuteList(Grimoires[j], Grimoires[j].PostExecuteSpells);
             }
         }
+
+        public static void Smallify()
+        {
+            Grimoires.Capacity = Grimoires.Count;
+            for (int j = 0; j < Grimoires.Count; j++)
+            {
+                Grimoires[j].Smallify();
+            }
+        }
+
+        public static void Smallify2()
+        {
+            Grimoires.TrimExcess();
+            for (int j = 0; j < Grimoires.Count; j++)
+            {
+                Grimoires[j].Smallify2();
+            }
+        }
+
     }
 }

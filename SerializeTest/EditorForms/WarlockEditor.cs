@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -29,10 +30,9 @@ namespace EditorForms
 
         Grimoire curGrim = null;
 
+        int stressTestVal = 300;
         void Generate()
         {
-
-
             Warlock.Reset();
             Grimoire grimoire = new Grimoire();
             grimoire.Name = "Default";
@@ -42,9 +42,48 @@ namespace EditorForms
             a.SetConditional(eqA);
             a.AddAction(new WarlockActionEcho("Test"));
             a.AddAction(new WarlockActionEcho("Test 1"));
+            a.AddAction(new WarlockActionEcho("Test 1"));
+            grimoire.LoadSpells.Add(a);
+
+            string[] s = new string[] { "a", "b", "c", "d", "e", "f", "g", "h", "i" };
+            Random r = new Random();
+            stressTestVal = (int)numericUpDownStress.Value;
+            for (int j = 0; j < stressTestVal; j++)
+            {
+                string N() {
+                    return s[r.Next(9)];
+                }
+
+                Spell a1 = new Spell();
+                var aeqC = new EWConditionGroup();
+                var aeqC1 = new EWConditionGroup();
+                var aeqC2 = new EWConditionGroup();
+
+                //Group1
+                aeqC1.AddConditional(new FirstEqualsSecond(N(), N()));
+                aeqC1.AddOperator(QuestionOp.AND);
+                aeqC1.AddConditional(new FirstEqualsSecond(N(), N()));
+
+                aeqC.AddConditional(aeqC1);
+
+                //if (r.Next(0, 2) == 0)
+                //{
+                    aeqC.AddOperator(QuestionOp.OR);
+
+                    //Group 2
+                    aeqC2.AddConditional(new FirstEqualsSecond("a", "a"));
+                    aeqC2.AddOperator(QuestionOp.AND);
+                    aeqC2.AddConditional(new FirstEqualsSecond("a", "a"));
+                    aeqC.AddConditional(aeqC2);
+                //}
+
+                a1.SetConditional(aeqC);
+
+                a1.AddAction(new WarlockActionNone());
+                grimoire.LoadSpells.Add(a1);
+            }
             //a.AddAction(new WarlockActionMega());
 
-            grimoire.LoadSpells.Add(a);
 
             Spell b = new Spell();
             var eqB = new FirstEqualsSecond("a", "b");
@@ -94,6 +133,7 @@ namespace EditorForms
             curGrim = grimoire;
             buttonTest.Enabled = true;
             Console.WriteLine("Spell c: " + eqC.ToString());
+            LoadEditor();
         }
 
 
@@ -180,7 +220,12 @@ namespace EditorForms
         private void buttonLoadTest_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Warlock Load");
+            Stopwatch w = new Stopwatch();
+            w.Start();
             Warlock.Load();
+            //w.Stop();
+            Console.WriteLine("Time taken: " + w.Elapsed);
+            w.Stop();
         }
 
         private void buttonRunTest_Click(object sender, EventArgs e)
@@ -201,6 +246,8 @@ namespace EditorForms
             {
                 testL[j].Apply();
             }
+            Warlock.Smallify();
+            //Warlock.Smallify2();
             SaveGrimoires("./grimoires.dat", Warlock.Grimoires);
         }
 

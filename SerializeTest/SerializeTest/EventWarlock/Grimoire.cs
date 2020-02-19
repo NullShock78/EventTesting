@@ -48,6 +48,41 @@ namespace RTCV.CorruptCore.EventWarlock
             Variables.Clear();
         }
 
+        public void Smallify()
+        {
+            //local functions yay
+            void SmallifyList(List<Spell> spellList)
+            {
+                spellList.Capacity = spellList.Count;
+                for (int j = 0; j < spellList.Count; j++)
+                {
+                    spellList[j].Smallify();
+                }
+            }
+
+            SmallifyList(LoadSpells);
+            SmallifyList(PreExecuteSpells);
+            SmallifyList(ExecuteSpells);
+            SmallifyList(PostExecuteSpells);
+        }
+
+        public void Smallify2()
+        {
+            //local functions yay
+            void SmallifyList(List<Spell> spellList)
+            {
+                spellList.TrimExcess();
+                for (int j = 0; j < spellList.Count; j++)
+                {
+                    spellList[j].Smallify2();
+                }
+            }
+
+            SmallifyList(LoadSpells);
+            SmallifyList(PreExecuteSpells);
+            SmallifyList(ExecuteSpells);
+            SmallifyList(PostExecuteSpells);
+        }
 
     }
 }

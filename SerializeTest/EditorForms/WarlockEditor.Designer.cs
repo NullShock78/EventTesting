@@ -37,6 +37,9 @@
             this.buttonLoadTest = new System.Windows.Forms.Button();
             this.buttonApply = new System.Windows.Forms.Button();
             this.buttonClear = new System.Windows.Forms.Button();
+            this.numericUpDownStress = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownStress)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonLoad
@@ -58,14 +61,13 @@
             // 
             // button1
             // 
-            this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(46, 61);
+            this.button1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.button1.Location = new System.Drawing.Point(46, 19);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
-            this.button1.Text = "Generate";
+            this.button1.Text = "Generate New";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // buttonSave
@@ -132,11 +134,44 @@
             this.buttonClear.UseVisualStyleBackColor = true;
             this.buttonClear.Click += new System.EventHandler(this.buttonClear_Click);
             // 
+            // numericUpDownStress
+            // 
+            this.numericUpDownStress.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numericUpDownStress.Location = new System.Drawing.Point(46, 64);
+            this.numericUpDownStress.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericUpDownStress.Name = "numericUpDownStress";
+            this.numericUpDownStress.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDownStress.TabIndex = 10;
+            this.numericUpDownStress.Value = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(46, 45);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(82, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Stress Iterations";
+            // 
             // WarlockEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.numericUpDownStress);
             this.Controls.Add(this.buttonClear);
             this.Controls.Add(this.buttonApply);
             this.Controls.Add(this.buttonLoadTest);
@@ -148,7 +183,9 @@
             this.Controls.Add(this.buttonLoad);
             this.Name = "WarlockEditor";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownStress)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -163,6 +200,8 @@
         private System.Windows.Forms.Button buttonLoadTest;
         private System.Windows.Forms.Button buttonApply;
         private System.Windows.Forms.Button buttonClear;
+        private System.Windows.Forms.NumericUpDown numericUpDownStress;
+        private System.Windows.Forms.Label label1;
     }
 }
 

@@ -42,7 +42,8 @@ namespace RTCV.CorruptCore.EventWarlock
             for (int j = 1; j < ct; j++)
             {
                 var next = Conditionals[j - 1].NextOp;
-                if (next == QuestionOp.AND) {
+                if (next == QuestionOp.AND)
+                {
                     res = res && Conditionals[j].Evaluate(grimoire);
                 }
                 else if(next == QuestionOp.OR)
@@ -55,6 +56,25 @@ namespace RTCV.CorruptCore.EventWarlock
                 }
             }
             return res;
+        }
+
+
+        public override void Smallify()
+        {
+            Conditionals.Capacity = Conditionals.Count;
+            for (int j = 0; j < Conditionals.Count; j++)
+            {
+                Conditionals[j].Smallify();
+            }
+        }
+
+        public override void Smallify2()
+        {
+            Conditionals.TrimExcess();
+            for (int j = 0; j < Conditionals.Count; j++)
+            {
+                Conditionals[j].Smallify2();
+            }
         }
     }
 }

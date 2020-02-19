@@ -57,7 +57,17 @@ namespace RTCV.CorruptCore.EventWarlock
             conditional = null;
         }
 
+        public void Smallify()
+        {
+            Conditional.Smallify();
+            Actions.Capacity = Actions.Count;
+        }
 
+        public void Smallify2()
+        {
+            Conditional.Smallify();
+            Actions.TrimExcess();
+        }
 
         /// <summary>
         /// Checks the conditionals and executes the actions if the conditionals evaluate to true. Returns the conditional result
