@@ -8,7 +8,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,30 +23,41 @@ namespace EditorForms
         public WarlockEditor()
         {
             InitializeComponent();
+            buttonTest.Enabled = false;
+
         }
+
+        Grimoire curGrim = null;
 
         void Generate()
         {
-            Warlock.Clear();
+
+
+            Warlock.Reset();
+            Grimoire grimoire = new Grimoire();
+            grimoire.Name = "Default";
+
             Spell a = new Spell();
             var eqA = new FirstEqualsSecond("a", "d");
             a.SetConditional(eqA);
             a.AddAction(new WarlockActionEcho("Test"));
             a.AddAction(new WarlockActionEcho("Test 1"));
-            a.AddAction(new WarlockActionEcho("Test 2"));
-            Warlock.AddLoadSpell(a);
+            //a.AddAction(new WarlockActionMega());
+
+            grimoire.LoadSpells.Add(a);
 
             Spell b = new Spell();
             var eqB = new FirstEqualsSecond("a", "b");
             b.SetConditional(eqB, true);
             b.AddAction(new WarlockActionEcho("Test Else"));
-            Warlock.AddLoadSpell(b);
+            grimoire.LoadSpells.Add(b);
 
             Spell b2 = new Spell();
             var eqB2 = new FirstEqualsSecond("a", "a");
             b2.SetConditional(eqB2, true);
             b2.AddAction(new WarlockActionEcho("Test Else 2"));
-            Warlock.AddLoadSpell(b2);
+            b2.AddAction(new WarlockActionCoroutineTest());
+            grimoire.LoadSpells.Add(b2);
 
             Spell c = new Spell();
             //(("a"=="l" AND "c"=="c") OR ("b"=="b" AND "c"=="c"))
@@ -69,46 +83,93 @@ namespace EditorForms
             c.SetConditional(eqC);
 
             c.AddAction(new WarlockActionEcho("Big Test"));
-            c.AddAction(new WarlockActionMega("a", "b", "c", false));
-            Warlock.AddPostExecuteSpell(c);
+            
+            var wam = (WarlockActionMega)FormatterServices.GetUninitializedObject(typeof(WarlockActionMega));
+            c.AddAction(wam);
+            //c.AddAction(new WarlockActionMega());
+            //c.AddAction(new WarlockActionMega());
+            grimoire.PostExecuteSpells.Add(c);
 
+            Warlock.AddGrimoire(grimoire);
+            curGrim = grimoire;
+            buttonTest.Enabled = true;
             Console.WriteLine("Spell c: " + eqC.ToString());
         }
 
 
         private void button1_Click(object sender, EventArgs e)
         {
-
             Generate();
            // Warlock.SaveGrimoire("./grimoire.dat");
         }
 
+
+        public static void SaveGrimoires(string path, List<Grimoire> grimoires)
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream s = new FileStream(path, FileMode.Create, FileAccess.Write);
+            formatter.Serialize(s, grimoires);
+            s.Close();
+        }
+
+        public static List<Grimoire> LoadGrimoires(string path)
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream s = new FileStream(path, FileMode.Open, FileAccess.Read);
+            var grimoires = (List<Grimoire>)formatter.Deserialize(s);
+            s.Close();
+            return grimoires;
+        }
+
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            Warlock.SaveGrimoire("./grimoire.dat");
+           SaveGrimoires("./grimoires.dat", Warlock.Grimoires);
         }
 
         private void buttonLoad_Click(object sender, EventArgs e)
         {
-            Warlock.LoadGrimoire("./grimoire.dat");
+            try
+            {
+                Warlock.Reset();
+                Warlock.LoadGrimoires(LoadGrimoires("./grimoires.dat"));
+            }
+            catch
+            {
+                Generate();
+                SaveGrimoires("./grimoires.dat", Warlock.Grimoires);
+            }
+
+            LoadEditor();
+        }
+
+        public void ClearAll()
+        {
+            flowPanel.Controls.Clear();
+            testL.Clear();
+            buttonTest.Enabled = true;
         }
 
 
-        FirstEqualsSecond condTest = null;
-        LoadControl testL = null;
-        private void buttonTest_Click(object sender, EventArgs e)
+        private void LoadEditor()
         {
-            Generate();
-            var spells = Warlock.BookOfSpells.PostExecuteSpells;
+            ClearAll();
+            var spells = Warlock.GetByName("Default").PostExecuteSpells;
             for (int j = 0; j < spells.Count; j++)
             {
+                //would load only one spell at a time, both conditionals and 
                 for (int k = 0; k < spells[j].Actions.Count; k++)
                 {
                     var lc = new LoadControl(spells[j].Actions[k]);
                     flowPanel.Controls.Add(lc);
+                    testL.Add(lc);
                 }
-               
             }
+        }
+
+        List<LoadControl> testL = new List<LoadControl>();
+        private void buttonTest_Click(object sender, EventArgs e)
+        {
+            LoadEditor();
 
             //TestClass cl = new TestClass("123", false, true, "abc");
             //condTest = new FirstEqualsSecond("a", "b");
@@ -116,10 +177,36 @@ namespace EditorForms
             //flowPanel.Controls.Add(testL);
         }
 
-        private void buttonTestPrint_Click(object sender, EventArgs e)
+        private void buttonLoadTest_Click(object sender, EventArgs e)
         {
-            var v = (EWConditional)testL.Generate();
-            Console.WriteLine(v.ToString());
+            Console.WriteLine("Warlock Load");
+            Warlock.Load();
+        }
+
+        private void buttonRunTest_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine("Warlock PreExecute");
+            Warlock.PreExecute();
+
+            Console.WriteLine("Warlock Execute");
+            Warlock.Execute();
+
+            Console.WriteLine("Warlock PostExecute");
+            Warlock.PostExecute();
+        }
+
+        private void buttonApply_Click(object sender, EventArgs e)
+        {
+            for (int j = 0; j < testL.Count; j++)
+            {
+                testL[j].Apply();
+            }
+            SaveGrimoires("./grimoires.dat", Warlock.Grimoires);
+        }
+
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            ClearAll();
         }
     }
 }

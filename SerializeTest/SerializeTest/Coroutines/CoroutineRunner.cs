@@ -1,35 +1,35 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.Core.OssCoroutines
+namespace RTCV.CorruptCore.Coroutines
 {
+    //public delegate IEnumerator<Yielder> CoroutineReturn();
+
     /// <summary>
-    /// Used to implement coroutines
+    /// Used to manage and run coroutines
     /// </summary>
     public class CoroutineRunner
     {
-
-        LinkedList<Coroutine> subCoroutines = new LinkedList<Coroutine>();
-
-        public void StopAll()
+        LinkedList<Coroutine> coroutines = new LinkedList<Coroutine>();
+        public void StopAndClearAll()
         {
-            foreach (var cor in subCoroutines)
+            foreach (var cor in coroutines)
             {
                 cor.Stop();
             }
-            subCoroutines.Clear();
+            coroutines.Clear();
         }
 
         public bool RemoveCoroutine(Coroutine coroutine)
         {
-            return subCoroutines.Remove(coroutine);
+            return coroutines.Remove(coroutine);
         }
         public void AddCoroutineLast(Coroutine coroutine)
         {
-            subCoroutines.AddLast(coroutine);
+            coroutines.AddLast(coroutine);
         }
 
         /// <summary>
@@ -40,13 +40,21 @@ namespace Assets.Scripts.Core.OssCoroutines
         public Coroutine StartCoroutine(IEnumerator<Yielder> enumerator)
         {
             Coroutine res = new Coroutine(enumerator);
-            subCoroutines.AddLast(res);
+            coroutines.AddLast(res);
             return res;
         }
 
+        //public Coroutine StartCoroutineNoAuto(CoroutineReturn enumerator)
+        //{
+        //    Coroutine res = new Coroutine(enumerator);
+        //    coroutines.AddLast(res);
+        //    return res;
+        //}
+
+
         public void Update()
         {
-            var curCoroutineNode = subCoroutines.First;
+            var curCoroutineNode = coroutines.First;
             while (curCoroutineNode != null)
             {
                 Coroutine curCoroutine = curCoroutineNode.Value;
@@ -55,7 +63,7 @@ namespace Assets.Scripts.Core.OssCoroutines
                 if (curCoroutine.IsComplete)
                 {
                     curCoroutineNode.Value = null;
-                    subCoroutines.Remove(curCoroutineNode);
+                    coroutines.Remove(curCoroutineNode);
                 }
                 curCoroutineNode = nextNode;
             }

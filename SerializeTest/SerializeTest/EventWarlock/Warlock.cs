@@ -1,4 +1,3 @@
-using SerializeTest.EventWarlock;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,79 +6,113 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using RTCV.CorruptCore.Coroutines;
 
 namespace RTCV.CorruptCore.EventWarlock
 {
     /// <summary>
-    /// I'm a wizard hagrid
+    /// I'm a wizard?? If you rename this you can't see the magic
     /// </summary>
     public static class Warlock
     {
-        public static Grimoire BookOfSpells = new Grimoire();
+        /// <summary>
+        /// The list of grimoires 
+        /// </summary>
+        public static List<Grimoire> Grimoires { get; private set; } = new List<Grimoire>();
+
+        /// <summary>
+        /// Last result(conditionals), used for else logic within Spells. All elses will be after another spell
+        /// </summary>
         public static bool LastResult { get; private set; } = false;
 
 
-        public static void Clear()
+        public static Grimoire GetByName(string name)
         {
-            BookOfSpells.LoadSpells.Clear();
-            BookOfSpells.PreExecuteSpells.Clear();
-            BookOfSpells.PostExecuteSpells.Clear();
+            return Grimoires.FirstOrDefault(x => x.Name == name);
         }
 
-        public static void SaveGrimoire(string path)
+        /// <summary>
+        /// Add new grimoire
+        /// </summary>
+        /// <param name="grimoire"></param>
+        /// <returns></returns>
+        public static bool AddGrimoire(Grimoire grimoire)
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream s = new FileStream(path, FileMode.Create, FileAccess.Write);
-            formatter.Serialize(s, BookOfSpells);
-            s.Close();
+            if(grimoire.Name != null && Grimoires.Any(x => x.Name == grimoire.Name))
+            {
+                return false;
+            }
+            else
+            {
+                Grimoires.Add(grimoire);
+                return true;
+            }
         }
 
-        public static void LoadGrimoire(string path)
+        public static void RemoveGrimoire(Grimoire g)
         {
-            IFormatter formatter = new BinaryFormatter();
-            Stream s = new FileStream(path, FileMode.Open, FileAccess.Read);
-            BookOfSpells = (Grimoire)formatter.Deserialize(s);
-            s.Close();
-        }
-
-
-        public static void AddLoadSpell(Spell spell)
-        {
-            BookOfSpells.LoadSpells.Add(spell);
-        }
-
-        public static void AddPreExecuteSpell(Spell spell)
-        {
-            BookOfSpells.PreExecuteSpells.Add(spell);
-        }
-
-        public static void AddPostExecuteSpell(Spell spell)
-        {
-            BookOfSpells.PostExecuteSpells.Add(spell);
+            Grimoires.Remove(g);
         }
 
 
+        public static void Reset()
+        {
+            Grimoires.Clear();
+            Grimoire.ResetStaticVariables();
+            CoroutineEngine.Reset();
+            LastResult = false;
+        }
+
+        public static void LoadGrimoires(List<Grimoire> grimoires)
+        {
+            Reset();
+            Grimoires = grimoires;
+        }
+
+        private static void ExecuteList(Grimoire grimoire, List<Spell> list)
+        {
+            for (int j = 0; j < list.Count; j++)
+            {
+                if (list[j].Enabled)
+                {
+                    LastResult = list[j].Execute(grimoire);
+                }
+            }
+        }
+
+        //todo: rename
         public static void Load()
         {
-            for (int j = 0; j < BookOfSpells.LoadSpells.Count; j++)
+            for (int j = 0; j < Grimoires.Count; j++)
             {
-                LastResult = BookOfSpells.LoadSpells[j].Execute();
-            }
+                ExecuteList(Grimoires[j], Grimoires[j].LoadSpells); 
+            }          
         }
 
         public static void PreExecute()
         {
-            for (int j = 0; j < BookOfSpells.PreExecuteSpells.Count; j++)
+            CoroutineEngine.PreExecute.Update();
+            for (int j = 0; j < Grimoires.Count; j++)
             {
-                LastResult = BookOfSpells.PreExecuteSpells[j].Execute();
+                ExecuteList(Grimoires[j], Grimoires[j].PreExecuteSpells);
+            }
+        }
+
+        public static void Execute()
+        {
+            CoroutineEngine.Execute.Update();
+            for (int j = 0; j < Grimoires.Count; j++)
+            {
+                ExecuteList(Grimoires[j], Grimoires[j].ExecuteSpells);
             }
         }
 
         public static void PostExecute()
         {
-            for (int j = 0; j < BookOfSpells.PostExecuteSpells.Count; j++)
+            CoroutineEngine.PostExecute.Update();
+            for (int j = 0; j < Grimoires.Count; j++)
             {
-                LastResult = BookOfSpells.PostExecuteSpells[j].Execute();
+                ExecuteList(Grimoires[j], Grimoires[j].PostExecuteSpells);
             }
         }
     }

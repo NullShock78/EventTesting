@@ -1,24 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.Core.OssCoroutines
+namespace RTCV.CorruptCore.Coroutines
 {
-    static class CoroutineEngine
+    /// <summary>
+    /// Holds all the coroutine runners
+    /// </summary>
+    public static class CoroutineEngine
     {
-        public static CoroutineRunner Load = new CoroutineRunner();
         public static CoroutineRunner PreExecute = new CoroutineRunner();
+        public static CoroutineRunner Execute = new CoroutineRunner();
         public static CoroutineRunner PostExecute = new CoroutineRunner();
 
-        public static void StopAll()
+        public static void Reset()
         {
-            Load.StopAll();
-            PreExecute.StopAll();
-            PostExecute.StopAll();
+            PreExecute.StopAndClearAll();
+            Execute.StopAndClearAll();
+            PostExecute.StopAndClearAll();
         }
-
-        
     }
 }

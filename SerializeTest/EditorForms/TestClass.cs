@@ -1,4 +1,4 @@
-﻿using SerializeTest.WarlockEditor;
+﻿using RTCV.CorruptCore.EventWarlock.WarlockEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +10,13 @@ namespace EditorForms
     class TestClass
     {
         //Linked to load
-        [LinkToCtor("a")] string aa;
-        [LinkToCtor("b")] bool bb;
-        [LinkToCtor("c")] bool cc;
-        [LinkToCtor("d")] string dd;
+        [EditorField("a")] string aa;
+        [EditorField("b")] bool bb;
+        [EditorField("c")] bool cc;
+        [EditorField("d")] string dd;
 
-        [EditorConstructor]
+        public TestClass() { }
+
         public TestClass(string a, bool b, bool c, string d)
         {
             aa = a;

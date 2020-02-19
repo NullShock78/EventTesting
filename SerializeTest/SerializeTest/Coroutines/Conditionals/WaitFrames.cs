@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.Core.OssCoroutines
+namespace RTCV.CorruptCore.Coroutines
 {
-    class WaitFrames : Yielder
+    /// <summary>
+    /// Note: counts the current frame as one frame
+    /// </summary>
+    public class WaitFrames : Yielder
     {
         int framesLeft;
         public WaitFrames(int frames = 1)

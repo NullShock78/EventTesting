@@ -1,51 +1,66 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.Core.OssCoroutines
+namespace RTCV.CorruptCore.Coroutines
 {
-    //using IEnumerator = IEnumerator<CoroutineConditional>;
+    //Can probably simplify logic or refactor
 
+    /// <summary>
+    /// Class form of a coroutine. Call StartCoroutine() on a <see cref="CoroutineRunner"/> in <see cref="CoroutineEngine"/> to start one
+    /// </summary>
     public class Coroutine
     {
-        //False of movenext means done;
         public bool IsComplete { get; protected set; } = false;
-        public bool Paused { get; protected set; } = false;
         IEnumerator<Yielder> coroutine;
         Yielder currentConditional;
-        public Coroutine(IEnumerator<Yielder> coroutine)
+        //CoroutineReturn startable;
+        /// <summary>
+        /// Used to create a coroutine, must be created
+        /// </summary>
+        /// <param name="coroutine"></param>
+        internal Coroutine(IEnumerator<Yielder> coroutine)
         {
             this.coroutine = coroutine;
-            Paused = false;
             currentConditional = coroutine.Current;
+            //startable = null;
         }
 
-        public void Pause(bool pause = true)
-        {
-            Paused = pause;
-        }
+        //internal Coroutine(CoroutineReturn coroutine)
+        //{
+        //    coroutine = null;
+        //    this.startable = coroutine;
+        //    currentConditional = null;
+        //}
 
-        public void Unpause()
-        {
-            Paused = false;
-        }
 
+        /// <summary>
+        /// Stops the coroutine and disposes it
+        /// </summary>
         public void Stop()
         {
-            currentConditional = null;
             IsComplete = true;
+            coroutine.Dispose();
         }
 
         public void DoCycle()
         {
-            if(IsComplete || Paused)
+            //if(startable != null)
+            //{
+            //    coroutine = startable.Invoke();
+            //    currentConditional = coroutine.Current;
+            //    startable = null;
+            //}
+            //else 
+            if(IsComplete)
             {
                 //Do nothing
             }
             else if (currentConditional == null || currentConditional.Process())
             {
+                //current conditional can be null if you use yield return null; basically acts as a single cycle skip
                 IsComplete = !coroutine.MoveNext();
                 currentConditional = coroutine.Current;
             }

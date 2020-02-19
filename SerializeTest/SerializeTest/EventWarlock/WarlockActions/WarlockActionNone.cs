@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace SerializeTest.EventWarlock.WarlockActions
 {
+    [Serializable]
     class WarlockActionNone : WarlockAction
     {
-        public override void DoAction()
+        public override void DoAction(Grimoire grimoire)
         {
             
         }

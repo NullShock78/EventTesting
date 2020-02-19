@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bindable.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="UserControls\LabeledTextbox.cs">
       <SubType>UserControl</SubType>

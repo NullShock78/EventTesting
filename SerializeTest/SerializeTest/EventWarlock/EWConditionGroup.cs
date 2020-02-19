@@ -9,69 +9,52 @@ namespace RTCV.CorruptCore.EventWarlock
     [System.Serializable]
     public class EWConditionGroup : EWConditional
     {
+        /// <summary>
+        /// The list of conditionals
+        /// </summary>
+        public List<EWConditional> Conditionals = new List<EWConditional>(2);
 
-        List<EWConditional> Questions = new List<EWConditional>(2);
-
+        /// <summary>
+        /// Adds a conditional. If an operator wasn't set on the last conditional it is automatically assigned a QuestionOp.AND
+        /// </summary>
+        /// <param name="w"></param>
         public void AddConditional(EWConditional w)
         {
-            Questions.Add(w);
+            Conditionals.Add(w);
+            if(Conditionals.Count > 1 && Conditionals[Conditionals.Count-1].NextOp == QuestionOp.NONE)
+            {
+                Conditionals[Conditionals.Count - 1].NextOp = QuestionOp.AND;
+            }
         }
 
         public void AddOperator(QuestionOp op)
         {
-            if (Questions.Count == 0) return;
-            else { Questions[Questions.Count - 1].NextOp = op; }
+            if (Conditionals.Count == 0) { return; }
+            else { Conditionals[Conditionals.Count - 1].NextOp = op; }
         }
 
-        public override bool Evaluate()
+        //Could use optimization
+        public override bool Evaluate(Grimoire grimoire)
         {
-            int ct = Questions.Count;
-            bool res = Questions[0].Evaluate();
+            int ct = Conditionals.Count;
+            bool res = Conditionals[0].Evaluate(grimoire);
             //bypassed if only one
             for (int j = 1; j < ct; j++)
             {
-                var next = Questions[j - 1].NextOp;
+                var next = Conditionals[j - 1].NextOp;
                 if (next == QuestionOp.AND) {
-                    res = res && Questions[j].Evaluate();
+                    res = res && Conditionals[j].Evaluate(grimoire);
                 }
                 else if(next == QuestionOp.OR)
                 {
-                    res = res || Questions[j].Evaluate();
+                    res = res || Conditionals[j].Evaluate(grimoire);
                 }
                 else
                 {
-                    //throw new Exception("Question NextOp not set");
-                    Console.WriteLine("Question NextOp not set");
-                    break;//testing
+                    break;
                 }
             }
             return res;
         }
-
-        public override string ToString()
-        {
-            string ret = "(";
-
-            for (int j = 0; j < Questions.Count; j++)
-            {
-                ret += Questions[j].ToString();
-            }
-
-            ret += ")";
-
-            switch (NextOp)
-            {
-                case QuestionOp.AND:
-                    ret += " AND ";
-                    break;
-                case QuestionOp.OR:
-                    ret += " OR ";
-                    break;
-                default:
-                    break;
-            }
-            return ret;
-        }
-
     }
 }

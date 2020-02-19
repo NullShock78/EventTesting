@@ -1,5 +1,5 @@
 ﻿using RTCV.CorruptCore.EventWarlock;
-using SerializeTest.WarlockEditor;
+using RTCV.CorruptCore.EventWarlock.WarlockEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 
 namespace SerializeTest.EventWarlock.WarlockActions
 {
+    [Serializable]
     public class WarlockActionMega : WarlockAction
     {
-        [LinkToCtor("a")] string a;
-        [LinkToCtor("b")] string b;
-        [LinkToCtor("c")] string c;
-        [LinkToCtor("d")] bool d;
+        [EditorField("a")] public string a;
+        [EditorField("b")] public string b;
+        [EditorField("c")] public string c;
+        [EditorField("d")] bool d;
 
-        [EditorConstructor]
+
         public WarlockActionMega(string a, string b, string c, bool d)
         {
             this.a = a;
@@ -24,7 +25,7 @@ namespace SerializeTest.EventWarlock.WarlockActions
             this.d = d;
         }
 
-        public override void DoAction()
+        public override void DoAction(Grimoire grimoire)
         {
             
         }

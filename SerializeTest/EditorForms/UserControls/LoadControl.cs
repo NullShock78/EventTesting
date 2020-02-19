@@ -8,7 +8,7 @@ using System.Text;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SerializeTest.WarlockEditor;
+using RTCV.CorruptCore.EventWarlock.WarlockEditor;
 
 namespace EditorForms.UserControls
 {
@@ -18,10 +18,10 @@ namespace EditorForms.UserControls
     /// </summary>
     public partial class LoadControl : UserControl
     {
-        object loaded = null;
+        object loadedObject = null;
         public bool Dirty { get; set; } = false;
-        Type generatedType = null;
-        ParameterBind[] parameters = null;
+        Type objectType = null;
+        FieldBind[] fieldBinds = null;
 
         //basically there for toolbox stuff
         public LoadControl()
@@ -33,34 +33,10 @@ namespace EditorForms.UserControls
         public LoadControl(Type genType)
         {
             InitializeComponent();
-
-            //if(!genType.IsSubclassOf()) { //throw error }
-            this.loaded = null;
-            Dirty = false;
-            labelName.Text = genType.Name;
-            generatedType = genType;
-            var parameters = genType.GetConstructors()
-               .FirstOrDefault(x => x.GetCustomAttribute<EditorConstructorAttribute>() != null)?.GetParameters();
-
-            this.parameters = new ParameterBind[parameters.Length];
-            for (int j = 0; j < parameters.Length; j++)
-            {
-                //if parameters has ignore, add parameter with default of 
-
-                var pb = new ParameterBind(parameters[j].Name, parameters[j].ParameterType, parameters[j].HasDefaultValue ? parameters[j].RawDefaultValue: null);
-
-
-                if (pb.type == typeof(bool))
-                {
-                    AddCheckbox(pb, parameters[j]);
-                }
-                else if(pb.type == typeof(string))
-                {
-                    AddTextBox(pb, parameters[j]);
-                }
-                this.parameters[j] = pb;
-            }
+            var instance = Activator.CreateInstance(genType);
+            Setup(instance);
         }
+
         private class LoadHelper 
         {
             public string paramName;
@@ -69,103 +45,108 @@ namespace EditorForms.UserControls
             {
                 paramName = p;
                 this.val = val;
-            }
-        
+            }        
         }
 
         public LoadControl(object loadedObj)
         {
             InitializeComponent();
-            var parameters = loadedObj.GetType().GetConstructors()
-                .FirstOrDefault(x => x.GetCustomAttribute<EditorConstructorAttribute>() != null)?.GetParameters();
+            Setup(loadedObj);
+        }
 
-            this.loaded = loadedObj;
-            Dirty = false;
-            generatedType = loadedObj.GetType();
-            labelName.Text = loadedObj.GetType().Name;
+        public void Setup(object loadedObj)
+        {
+            this.loadedObject = loadedObj;
+            this.objectType = loadedObj.GetType();
+            this.labelName.Text = objectType.Name;
 
-            var fields = loadedObj.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(x => x.GetCustomAttribute<LinkToCtorAttribute>() != null);
+            var fields = objectType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .Where(x => x.GetCustomAttribute<EditorFieldAttribute>() != null).ToArray();
 
+            this.fieldBinds = new FieldBind[fields.Length];
 
-            List<LoadHelper> linkedParamFields = new List<LoadHelper>();
-            foreach (var field in fields)
+            for (int j = 0; j < fields.Length; j++)
             {
-                string pName = field.GetCustomAttribute<LinkToCtorAttribute>().ParamName;
-                var o = field.GetValue(loadedObj);
-                linkedParamFields.Add(new LoadHelper(pName, o));
-            }
-            
-            this.parameters = new ParameterBind[parameters.Length];
-            for (int j = 0; j < parameters.Length; j++)
-            {
-                //if parameters has ignore, add parameter with default of 
-                var curVal = linkedParamFields.FirstOrDefault(x => x.paramName == parameters[j].Name)?.val;
-                var pb = new ParameterBind(parameters[j].Name, parameters[j].ParameterType, curVal);
+                //var curVal = fields[j].GetValue(loadedObj);
 
-                if (pb.type == typeof(bool))
+                var pb = new FieldBind(fields[j], loadedObj);
+
+                //TODO: Handle dynamically?
+                if (fields[j].FieldType == typeof(bool))
                 {
-                    AddCheckbox(pb, parameters[j], (bool)curVal);
+                    AddCheckbox(pb);
                 }
-                else if (pb.type == typeof(string))
+                else if (fields[j].FieldType == typeof(string))
                 {
-                    AddTextBox(pb, parameters[j], (string)curVal);
+                    AddTextBox(pb);
                 }
-                this.parameters[j] = pb;
+                else
+                {
+                    Console.WriteLine("Unknown type");
+                }
+                this.fieldBinds[j] = pb;
             }
         }
 
-
-        void AddTextBox(ParameterBind parameter, ParameterInfo info, string curval = "")
+        void AddTextBox(FieldBind field)
         {
-            LabeledTextbox c = new LabeledTextbox(parameter.Name);
-            c.Name = parameter.Name + "_TB";
-            c.Text = curval;
+            string name = field.GetEditorName();
+            LabeledTextbox c = new LabeledTextbox(name);
+            c.Name = name + "_TB";
 
-            c.TextChanged += (object sender, EventArgs e) =>
-            {
-                parameter.param = c.Text;
-            };
+            c.Text = (string)field.GetValue();
+
+            field.GetDataAction = () => { return c.Text; };
+
+            //c.TextChanged += (object sender, EventArgs e) =>
+            //{
+            //    field.data = c.Text;
+            //};
             this.flowPanel.Controls.Add(c);
         }
 
-        void AddCheckbox(ParameterBind parameter, ParameterInfo info, bool curval = false)
+        void AddCheckbox(FieldBind field)
         {
+            string name = field.GetEditorName();
             CheckBox c = new CheckBox();
-            c.Name = parameter.Name + "_CB";
-            c.Text = parameter.Name;
-            c.Checked = curval;
+            c.Name = name + "_CB";
+            c.Text = name;
+            c.Checked = (bool)field.GetValue();
 
-            c.CheckedChanged += (object sender, EventArgs e) =>
-            {
-                parameter.param = c.Checked;
-            };
+            field.GetDataAction = () => { return c.Checked; };
+
+            //c.CheckedChanged += (object sender, EventArgs e) =>
+            //{
+            //    field.data = c.Checked;
+            //};
             this.flowPanel.Controls.Add(c);
         }
 
-        public object[] CtorParams()
-        {
-            return parameters.Select(x => x.param).ToArray();
-        }
+        //public object[] CtorParams()
+        //{
+        //    return parameters.Select(x => x.data).ToArray();
+        //}
 
-        public object/*Action*/ Generate()
+        public object/*Action*/ Apply()
         {
-            return Activator.CreateInstance(generatedType, CtorParams());
+            for (int j = 0; j < fieldBinds.Length; j++)
+            {
+                fieldBinds[j].Apply();
+            }
+
+            return loadedObject;
         }
 
     }
 
-    class ParameterBind
+    class FieldBind
     {
-        public string Name;
-        public object param;
-        public Type type;
+        public FieldInfo field;
+        object owner = null;
+        public object data = null;
 
-        /// <summary>
-        /// Sets the value to default
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
+        public Func<object> GetDataAction = null;
+
         static object GetDefault(Type t)
         {
             if (t.IsValueType)
@@ -175,13 +156,42 @@ namespace EditorForms.UserControls
             return null;
         }
 
-        public ParameterBind(string name, Type t, object def = null)
+        public FieldBind(FieldInfo f, object owner)
         {
-            this.Name = name;
-            if (def == null) { this.param = GetDefault(t); }
-            else { this.param = def; }
-            this.type = t;
+            this.field = f;
+            this.owner = owner;
+
+            try
+            {
+                data = GetValue();
+            }
+            catch
+            {
+                data = GetDefault(field.FieldType);
+            }
+        
         }
+
+        public string GetEditorName()
+        {
+            return this.field.GetCustomAttribute<EditorFieldAttribute>().FieldName;
+        }
+
+        public void SetValue(object val)
+        {
+            this.field.SetValue(owner, val);
+        }
+
+        public object GetValue()
+        {
+            return this.field.GetValue(owner);
+        }
+
+        public void Apply()
+        {
+            SetValue(GetDataAction.Invoke());
+        }
+
     }
 
 }
