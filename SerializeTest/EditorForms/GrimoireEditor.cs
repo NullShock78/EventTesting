@@ -189,6 +189,8 @@ namespace EditorForms
                 loadedGrimoire.RemoveSpell(spell);
                 panel.Remove(b);
                 listPanelActions.Clear();
+                editControl.Clear();
+                SetEditControl(loadControlCurrent);
             };
 
             return b;

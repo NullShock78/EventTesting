@@ -46,13 +46,13 @@ namespace EditorForms.CustomEditorControls
 
         public override void Apply()
         {
-            webBrowserRick.Navigate("https://www.google.com");
-            Controls.Remove(webBrowserRick);
+            Clear();
         }
 
         public override void Clear()
         {
-           
+            webBrowserRick.Navigate("https://www.google.com");
+            Controls.Remove(webBrowserRick);
         }
 
         public override void LoadObject(object o, string name = null)

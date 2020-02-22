@@ -28,6 +28,7 @@ namespace EditorForms.UserControls
         public LoadControl()
         {
             InitializeComponent();
+            labelName.Text = "[None]";
         }
 
         public override void Clear()
