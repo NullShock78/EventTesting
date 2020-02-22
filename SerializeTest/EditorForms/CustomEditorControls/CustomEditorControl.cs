@@ -23,7 +23,6 @@ namespace EditorForms.CustomEditorControls
             Dock = DockStyle.Fill;
             webBrowserRick.Hide();
             webBrowserRick.ProgressChanged += WebBrowserRick_ProgressChanged;
-            //webBrowserRick.Navigate("https://www.latlmes.com/breaking/trick-narry-1");
         }
 
         private async void WebBrowserRick_ProgressChanged(object sender, WebBrowserProgressChangedEventArgs e)
