@@ -35,6 +35,14 @@ namespace RTCV.CorruptCore.EventWarlock
         public Dictionary<string, object> Variables = new Dictionary<string, object>();
 
 
+        public Spell GetSpellByName(string name)
+        {
+            return LoadSpells.FirstOrDefault(x => x.Name == name) ??
+                PreExecuteSpells.FirstOrDefault(x => x.Name == name) ??
+                ExecuteSpells.FirstOrDefault(x => x.Name == name) ??
+                PostExecuteSpells.FirstOrDefault(x => x.Name == name);
+        }
+
         public static void ResetStaticVariables()
         {
             StaticFlags.Clear();
@@ -84,5 +92,10 @@ namespace RTCV.CorruptCore.EventWarlock
             SmallifyList(PostExecuteSpells);
         }
 
+        public void RemoveSpell(Spell spell)
+        {
+            //Wowee fun code in one line :)
+            if (!LoadSpells.Remove(spell)) if (!PreExecuteSpells.Remove(spell)) if (!ExecuteSpells.Remove(spell)) if (!PostExecuteSpells.Remove(spell)) { }
+        }
     }
 }

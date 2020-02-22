@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SerializeTest.EventWarlock.WarlockConditions
+namespace RTCV.CorruptCore.EventWarlock.WarlockConditions
 {
     [Serializable]
     public class FirstEqualsSecond : EWConditional

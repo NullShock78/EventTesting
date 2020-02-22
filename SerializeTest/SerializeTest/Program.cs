@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using RTCV.CorruptCore.Coroutines;
 using RTCV.CorruptCore.EventWarlock;
 using RTCV.CorruptCore.EventWarlock.WarlockActions;
-using SerializeTest.EventWarlock.WarlockConditions;
+using RTCV.CorruptCore.EventWarlock.WarlockConditions;
 
 namespace SerializeTest
 {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SerializeTest.EventWarlock.WarlockActions
 {
+    [WarlockEditable("Mega")]
     [Serializable]
     public class WarlockActionMega : WarlockAction
     {
@@ -15,7 +16,6 @@ namespace SerializeTest.EventWarlock.WarlockActions
         [EditorField("b")] public string b;
         [EditorField("c")] public string c;
         [EditorField("d")] bool d;
-
 
         public WarlockActionMega(string a, string b, string c, bool d)
         {

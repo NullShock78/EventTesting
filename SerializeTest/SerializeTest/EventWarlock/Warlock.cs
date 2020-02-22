@@ -54,7 +54,6 @@ namespace RTCV.CorruptCore.EventWarlock
             Grimoires.Remove(g);
         }
 
-
         public static void Reset()
         {
             Grimoires.Clear();

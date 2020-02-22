@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RTCV.CorruptCore.Coroutines
 {
     /// <summary>
-    /// Note: counts the current frame as one frame
+    /// Note: will always delay at least one frame
     /// </summary>
     public class WaitFrames : Yielder
     {

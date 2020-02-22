@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RTCV.CorruptCore.EventWarlock.WarlockEditor;
+using System.Runtime.Serialization;
 
 namespace EditorForms.UserControls
 {
@@ -16,7 +17,7 @@ namespace EditorForms.UserControls
     /// <summary>
     /// A class used for displaying constructors for arbitrary actions and conditionals, creating them
     /// </summary>
-    public partial class LoadControl : UserControl
+    public partial class LoadControl : WarlockEditControl
     {
         object loadedObject = null;
         public bool Dirty { get; set; } = false;
@@ -29,15 +30,32 @@ namespace EditorForms.UserControls
             InitializeComponent();
         }
 
-        //Todo: attribute field info instead
-        public LoadControl(Type genType)
+        public override void Clear()
         {
-            InitializeComponent();
-            var instance = Activator.CreateInstance(genType);
-            Setup(instance);
+            Dirty = false;
+            objectType = null;
+            loadedObject = null;
+            fieldBinds = null;
+            this.flowPanel.Controls.Clear();
+            this.labelName.Text = "[None]";
         }
 
-        private class LoadHelper 
+        //Todo: attribute field info instead
+        public void LoadNewInstanceOfType(Type genType)
+        {
+            Clear();
+            var instance = FormatterServices.GetUninitializedObject(genType);
+            Setup(instance, null);
+        }
+
+        public override void LoadObject(object obj, string name = null)
+        {
+            Clear();
+            Setup(obj, name);
+        }
+
+
+        private class LoadHelper
         {
             public string paramName;
             public object val;
@@ -45,20 +63,14 @@ namespace EditorForms.UserControls
             {
                 paramName = p;
                 this.val = val;
-            }        
+            }
         }
 
-        public LoadControl(object loadedObj)
-        {
-            InitializeComponent();
-            Setup(loadedObj);
-        }
-
-        public void Setup(object loadedObj)
+        public void Setup(object loadedObj, string name)
         {
             this.loadedObject = loadedObj;
             this.objectType = loadedObj.GetType();
-            this.labelName.Text = objectType.Name;
+            this.labelName.Text = name == null ? objectType.Name : name;
 
             var fields = objectType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                 .Where(x => x.GetCustomAttribute<EditorFieldAttribute>() != null).ToArray();
@@ -71,7 +83,7 @@ namespace EditorForms.UserControls
 
                 var pb = new FieldBind(fields[j], loadedObj);
 
-                //TODO: Handle dynamically?
+                //TODO: Handle dynamically or with classes
                 if (fields[j].FieldType == typeof(bool))
                 {
                     AddCheckbox(pb);
@@ -80,6 +92,14 @@ namespace EditorForms.UserControls
                 {
                     AddTextBox(pb);
                 }
+                else if(fields[j].FieldType == typeof(int))
+                {
+                    AddNumberBox(pb);
+                }
+                else if (fields[j].FieldType.IsSubclassOf(typeof(Enum)))
+                {
+                    AddEnumComboBox(pb);
+                }
                 else
                 {
                     Console.WriteLine("Unknown type");
@@ -87,6 +107,66 @@ namespace EditorForms.UserControls
                 this.fieldBinds[j] = pb;
             }
         }
+
+
+        void AddEnumComboBox(FieldBind field)
+        {
+            string name = field.GetEditorName();
+            ComboBox c = new ComboBox();
+            c.Name = name + "_TB";
+
+            var names = Enum.GetNames(field.field.FieldType);
+            if(names.Length > 0)
+            {
+                c.Items.AddRange(names);
+                c.Text = Enum.GetName(field.field.FieldType, field.GetValue());
+                field.GetDataAction = () => {
+                    return Enum.Parse(field.field.FieldType, c.Text);
+                };
+            }
+            else
+            {
+                field.GetDataAction = () => {
+                    return Activator.CreateInstance(field.field.FieldType);
+                };
+            }
+           
+
+           
+            field.Reverted += (object o) => { c.Text = Enum.GetName(field.field.FieldType, o); };
+            //c.TextChanged += (object sender, EventArgs e) =>
+            //{
+            //    field.data = c.Text;
+            //};
+            this.flowPanel.Controls.Add(c);
+        }
+
+        void AddNumberBox(FieldBind field)
+        {
+            string name = field.GetEditorName();
+            LabeledTextbox c = new LabeledTextbox(name);
+            c.Name = name + "_TB";
+
+            c.Text = field.GetValue().ToString();
+
+            field.GetDataAction = () => {
+                if (int.TryParse(c.Text, out int r))
+                {
+                    return r;
+                }
+                else
+                {
+                    return 0;
+                }
+            };
+            field.Reverted += (object o) => { c.Text = o.ToString(); };
+            //c.TextChanged += (object sender, EventArgs e) =>
+            //{
+            //    field.data = c.Text;
+            //};
+            this.flowPanel.Controls.Add(c);
+        }
+
 
         void AddTextBox(FieldBind field)
         {
@@ -97,7 +177,7 @@ namespace EditorForms.UserControls
             c.Text = (string)field.GetValue();
 
             field.GetDataAction = () => { return c.Text; };
-
+            field.Reverted += (object o) => { c.Text = (string)o; };
             //c.TextChanged += (object sender, EventArgs e) =>
             //{
             //    field.data = c.Text;
@@ -114,6 +194,7 @@ namespace EditorForms.UserControls
             c.Checked = (bool)field.GetValue();
 
             field.GetDataAction = () => { return c.Checked; };
+            field.Reverted += (object o) => { c.Checked = (bool)o; };
 
             //c.CheckedChanged += (object sender, EventArgs e) =>
             //{
@@ -127,16 +208,44 @@ namespace EditorForms.UserControls
         //    return parameters.Select(x => x.data).ToArray();
         //}
 
-        public object/*Action*/ Apply()
+        public override void Apply()
+        {
+            if (this.loadedObject != null)
+            {
+                for (int j = 0; j < fieldBinds.Length; j++)
+                {
+                    fieldBinds[j].Apply();
+                }
+            }
+        }
+
+        //public void ApplyAndLoad(object obj)
+        //{
+        //    if (this.loadedObject != null)
+        //    {
+        //        Apply();
+        //    }
+        //    LoadObject(obj);
+        //}
+
+
+        public void Revert()
         {
             for (int j = 0; j < fieldBinds.Length; j++)
             {
-                fieldBinds[j].Apply();
-            }
-
-            return loadedObject;
+                fieldBinds[j].Revert();
+            } 
         }
 
+        private void buttonApply_Click(object sender, EventArgs e)
+        {
+            Apply();
+        }
+
+        private void buttonRevert_Click(object sender, EventArgs e)
+        {
+            Revert();
+        }
     }
 
     class FieldBind
@@ -144,8 +253,10 @@ namespace EditorForms.UserControls
         public FieldInfo field;
         object owner = null;
         public object data = null;
+        public object def;
 
         public Func<object> GetDataAction = null;
+        public event Action<object> Reverted;
 
         static object GetDefault(Type t)
         {
@@ -163,11 +274,11 @@ namespace EditorForms.UserControls
 
             try
             {
-                data = GetValue();
+                def = data = GetValue();
             }
             catch
             {
-                data = GetDefault(field.FieldType);
+                def = data = GetDefault(field.FieldType);
             }
         
         }
@@ -189,7 +300,16 @@ namespace EditorForms.UserControls
 
         public void Apply()
         {
-            SetValue(GetDataAction.Invoke());
+            if (GetDataAction != null)
+            {
+                SetValue(GetDataAction.Invoke());
+            }
+        }
+
+        public void Revert()
+        {
+            data = def;
+            Reverted?.Invoke(def);
         }
 
     }

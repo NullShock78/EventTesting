@@ -46,8 +46,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddGrimoireForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddGrimoireForm.Designer.cs">
+      <DependentUpon>AddGrimoireForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Bindable.cs" />
+    <Compile Include="ComponentInfo.cs" />
+    <Compile Include="CustomEditorControls\CustomEditorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomEditorControls\CustomEditorControl.Designer.cs">
+      <DependentUpon>CustomEditorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputBox.Designer.cs">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ListPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ListPanel.Designer.cs">
+      <DependentUpon>ListPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="TestClass.cs" />
+    <Compile Include="GrimoireEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GrimoireEditor.Designer.cs">
+      <DependentUpon>GrimoireEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ButtonDeletable.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ButtonDeletable.Designer.cs">
+      <DependentUpon>ButtonDeletable.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\LabeledTextbox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -60,6 +97,9 @@
     <Compile Include="UserControls\LoadControl.Designer.cs">
       <DependentUpon>LoadControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\WarlockEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="WarlockEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -68,6 +108,27 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarlockPickListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WarlockPickListForm.Designer.cs">
+      <DependentUpon>WarlockPickListForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="AddGrimoireForm.resx">
+      <DependentUpon>AddGrimoireForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomEditorControls\CustomEditorControl.resx">
+      <DependentUpon>CustomEditorControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrimoireEditor.resx">
+      <DependentUpon>GrimoireEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InputBox.resx">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ButtonDeletable.resx">
+      <DependentUpon>ButtonDeletable.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserControls\LabeledTextbox.resx">
       <DependentUpon>LabeledTextbox.cs</DependentUpon>
     </EmbeddedResource>
@@ -86,6 +147,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="WarlockPickListForm.resx">
+      <DependentUpon>WarlockPickListForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

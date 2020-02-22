@@ -10,6 +10,7 @@ namespace RTCV.CorruptCore.EventWarlock.WarlockActions
     /// <summary>
     /// Example action
     /// </summary>
+    [WarlockEditable("Echo")]
     [Serializable]
     public class WarlockActionEcho : WarlockAction
     {
